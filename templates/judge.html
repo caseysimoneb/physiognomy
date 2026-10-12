@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{PLATE}}</title>
+<style>
+:root { color-scheme: light; --bg:#FFFFFF; --ink:#000000; --soft:#8A8A8A; --hair:#D8D8D8; }
+* { box-sizing: border-box; }
+html { background: var(--bg); }
+body { margin: 0; color: var(--ink); font: 13.25px/1.4 Helvetica, "Helvetica Neue", Arial, sans-serif; }
+a { color: inherit; }
+header { position: sticky; top: 0; z-index: 3; background: var(--bg); margin: 0 13px; padding: 13px 0 13px; border-bottom: 1px solid var(--ink); display:flex; justify-content:space-between; align-items:baseline; gap: 24px; }
+.soft { color: var(--soft); }
+main { padding: 24px 13px 120px; }
+.lede { max-width: 560px; margin: 0 0 24px; }
+.lede p { margin: 0; }
+.page { border-top: 1px solid var(--ink); padding: 13px 0 48px; }
+.cap { display:flex; gap: 24px; align-items:baseline; flex-wrap: wrap; margin-bottom: 13px; }
+.cap b { font-weight: bold; }
+.row { display:grid; grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr); gap: 24px; }
+.shot img { width: 100%; display:block; outline: 1px solid var(--hair); cursor: zoom-in; }
+.yn { display:flex; gap: 13px; align-items: baseline; }
+.yn button { font: inherit; color: var(--soft); background: none; border: 0; padding: 0; cursor: pointer; }
+.yn button:hover { color: var(--ink); }
+.yn button[aria-pressed="true"] { color: var(--ink); font-weight: bold; text-decoration: underline; text-underline-offset: 3px; }
+.side .yn { margin-bottom: 9px; }
+textarea { width: 100%; font: inherit; color: var(--ink); background: transparent; border: 0; border-bottom: 1px solid var(--hair); resize: none; padding: 4px 0; min-height: 24px; overflow: hidden; }
+textarea:focus { outline: none; border-bottom-color: var(--ink); }
+textarea::placeholder { color: var(--soft); }
+.mats { display:grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 13px 24px; margin-top: 24px; }
+.mat { border-top: 1px solid var(--hair); padding-top: 6px; }
+.mat .pic { height: 64px; display:flex; align-items:center; overflow:hidden; margin-bottom: 6px; }
+.mat .pic img { max-width: 100%; max-height: 64px; display:block; }
+.mat .sw { width: 100%; height: 40px; outline: 1px solid var(--hair); }
+.mat .bars { display:flex; align-items:flex-end; gap: 4px; height: 48px; }
+.mat .bars i { display:block; width: 7px; background: var(--ink); }
+.mat .lab { word-break: break-word; }
+.mat.yes { outline: 1px solid var(--ink); outline-offset: 4px; }
+.mat.no { opacity: .45; }
+#big { position: fixed; inset: 0; background: rgba(255,255,255,.97); z-index: 6; display:none; align-items:center; justify-content:center; padding: 24px; cursor: zoom-out; }
+#big.open { display:flex; }
+#big img { max-width: 100%; max-height: 100%; outline: 1px solid var(--hair); }
+@media (max-width: 760px) { .row { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header><b>Physiognomy · {{PLATE}}</b><span class="soft" id="tally"></span><span class="soft" id="kept">nothing kept yet</span></header>
+<main>
+  <div class="lede">
+    <p>Each page, and beneath it, the materials it's made of.</p>
+    <p>Say yes or no to the page, and separately to any material: a typeface can be yes on a page that's no.</p>
+    <p>Leave anything unmarked. Click a picture to see it large. A why is optional; dictation works.</p>
+  </div>
+  <div id="pages"></div>
+</main>
+<div id="big"><img alt=""></div>
+<script>
+const CARDS = /*CARDS*/[];
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+let marks = { pages: {} };
+const pm = stem => marks.pages[stem] || (marks.pages[stem] = { page: "", why: "", materials: {} });
+const big = document.getElementById("big");
+big.onclick = () => big.classList.remove("open");
+addEventListener("keydown", e => { if (e.key === "Escape") big.classList.remove("open"); });
+
+function yn(get, set) {
+  const w = document.createElement("span"); w.className = "yn";
+  ["yes", "no"].forEach(v => { const b = document.createElement("button"); b.textContent = v; b.dataset.v = v;
+    b.onclick = e => { e.stopPropagation(); set(get() === v ? "" : v); paint(); }; w.appendChild(b); });
+  const paint = () => w.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", get() === b.dataset.v));
+  w.paint = paint; paint(); return w;
+}
+
+function matPic(m) {
+  if (m.kind === "colour") return `<div class="sw" style="background:${esc(m.hex)}"></div>`;
+  if (m.kind === "scale") { const top = Math.max(...m.sizes); return `<div class="bars">${m.sizes.map(s => `<i style="height:${Math.max(3, Math.round(48 * s / top))}px"></i>`).join("")}</div>`; }
+  return m.img ? `<img loading="lazy" src="/file/${esc(m.img)}" alt="">` : "";
+}
+
+function render() {
+  const root = document.getElementById("pages");
+  CARDS.forEach(c => {
+    const d = document.createElement("section"); d.className = "page";
+    const host = c.url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
+    d.innerHTML = `<div class="cap"><span class="soft">${c.no}</span><b>${esc(c.name)}</b><a class="soft" href="${esc(c.url)}" target="_blank" rel="noopener">${esc(host)} ↗</a></div>
+      <div class="row"><div class="shot"><img loading="lazy" src="/file/${esc(c.img)}" alt=""></div>
+      <div class="side"><div class="soft">the page</div><div class="pageyn"></div><textarea rows="1" placeholder="why (optional)"></textarea></div></div>
+      <div class="mats"></div>`;
+    d.querySelector(".shot img").onclick = () => { big.querySelector("img").src = "/file/" + c.img; big.classList.add("open"); };
+    d.querySelector(".pageyn").appendChild(yn(() => pm(c.stem).page, v => { pm(c.stem).page = v; save(); }));
+    const t = d.querySelector("textarea"); t.value = pm(c.stem).why || "";
+    const grow = () => { t.style.height = "auto"; t.style.height = t.scrollHeight + "px"; };
+    t.oninput = () => { pm(c.stem).why = t.value; grow(); save(); }; requestAnimationFrame(grow);
+    const mats = d.querySelector(".mats");
+    c.materials.forEach(m => {
+      const el = document.createElement("div"); el.className = "mat";
+      el.innerHTML = `<div class="pic">${matPic(m)}</div><div class="lab"><b>${esc(m.label)}</b> <span class="soft">${esc(m.kind)} · ${esc(m.detail)}</span></div>`;
+      const get = () => pm(c.stem).materials[m.id] || "";
+      const w = yn(get, v => { pm(c.stem).materials[m.id] = v; el.className = "mat" + (v ? " " + v : ""); save(); });
+      el.appendChild(w); el.className = "mat" + (get() ? " " + get() : "");
+      mats.appendChild(el);
+    });
+    root.appendChild(d);
+  });
+}
+
+function tally() {
+  const ps = Object.values(marks.pages);
+  const pages = ps.filter(p => p.page).length;
+  const mats = ps.reduce((n, p) => n + Object.values(p.materials || {}).filter(Boolean).length, 0);
+  document.getElementById("tally").textContent = `${pages} of ${CARDS.length} pages · ${mats} materials marked`;
+}
+
+let timer;
+function save() {
+  tally(); clearTimeout(timer);
+  timer = setTimeout(async () => {
+    try {
+      const r = await fetch("/judge-marks", { method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plate: "{{PLATE}}", pages: marks.pages, meta: CARDS.map(c => ({ stem: c.stem, no: c.no, name: c.name, url: c.url })) }) });
+      if (!r.ok) throw 0;
+      const n = new Date(); document.getElementById("kept").textContent = "kept, " + String(n.getHours()).padStart(2, "0") + ":" + String(n.getMinutes()).padStart(2, "0");
+    } catch { document.getElementById("kept").textContent = "not kept: is serve.py running?"; }
+  }, 500);
+}
+
+(async () => {
+  try { const had = await (await fetch("/judge-marks?plate={{PLATE}}")).json(); if (had && had.pages) marks.pages = had.pages; } catch {}
+  render(); tally();
+})();
+</script>
+</body>
+</html>

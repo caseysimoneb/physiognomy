@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Physiognomy</title>
+<style>
+:root { color-scheme: light; --bg:#FFFFFF; --ink:#000000; --soft:#8A8A8A; --rule:#000000; --hair:#D8D8D8; }
+* { box-sizing: border-box; }
+html { background: var(--bg); }
+body { margin: 0; color: var(--ink); font: 13.25px/1.4 Helvetica, "Helvetica Neue", Arial, sans-serif; }
+a { color: inherit; }
+header { padding: 13px 13px 0; }
+.top { display:flex; justify-content:space-between; align-items:baseline; padding-bottom: 24px; border-bottom: 1px solid var(--rule); }
+.top b { font-weight: bold; }
+nav { display:flex; gap: 24px; }
+nav a { text-decoration: none; }
+nav a[aria-current="true"] { font-weight: bold; }
+main { padding: 24px 13px 96px; }
+section[data-tab] { display: none; }
+section[data-tab].on { display: block; }
+.soft { color: var(--soft); }
+.lede { max-width: 520px; margin: 0 0 24px; }
+h2 { font-size: inherit; font-weight: bold; margin: 0; }
+.block { border-top: 1px solid var(--hair); padding: 13px 0 24px; }
+.filter { display:flex; gap: 13px; margin: 0 0 13px; }
+.filter button { font: inherit; color: var(--soft); background: none; border: 0; padding: 0; cursor: pointer; }
+.filter button[aria-pressed="true"] { color: var(--ink); font-weight: bold; }
+.pins { display:grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 13px; }
+.pin img { width: 100%; aspect-ratio: 1; object-fit: cover; display:block; background: var(--hair); }
+.pin span { display:block; color: var(--soft); margin-top: 2px; }
+.site { display:grid; grid-template-columns: 240px 1fr; gap: 24px; padding: 13px 0; border-top: 1px solid var(--hair); }
+.site img { width: 240px; aspect-ratio: 1440/900; object-fit: cover; display:block; background: var(--hair); }
+.site .q { margin: 0; max-width: 560px; }
+.site .q + .q { margin-top: 6px; }
+.verdict { display:grid; grid-template-columns: 240px 1fr; gap: 24px; padding: 13px 0 6px; }
+.para { max-width: 560px; margin: 0; }
+table { border-collapse: collapse; width: 100%; margin: 6px 0 24px; }
+th, td { text-align: left; font-weight: normal; padding: 4px 13px 4px 0; border-top: 1px solid var(--hair); vertical-align: top; }
+th { color: var(--soft); }
+.chip { display:inline-block; width: 9px; height: 9px; vertical-align: -1px; margin-right: 3px; outline: 1px solid var(--hair); }
+.profile { max-width: 620px; }
+.profile h2 { margin: 0 0 13px; }
+.profile h3 { font-size: inherit; font-weight: bold; margin: 24px 0 6px; padding-top: 13px; border-top: 1px solid var(--hair); }
+.profile h4 { font-size: inherit; font-weight: bold; margin: 13px 0 4px; }
+.profile p { margin: 0 0 13px; }
+.profile ul { margin: 0 0 13px; padding-left: 13px; }
+.profile li { margin: 0 0 4px; }
+.profile code { font: inherit; }
+.kind { border-top: 1px solid var(--rule); padding: 13px 0 24px; }
+.kind > h2 { margin-bottom: 13px; }
+.mats { display:grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 24px 24px; }
+.mats.wide { grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); }
+.mat { cursor: pointer; }
+.mat .pic { height: 72px; display:flex; align-items:center; overflow:hidden; border-top: 1px solid var(--hair); padding-top: 6px; }
+.mats.wide .mat .pic { height: auto; }
+.mat .pic img { max-width: 100%; max-height: 72px; display:block; }
+.mats.wide .mat .pic img { max-height: none; }
+.mat .sw { width: 100%; height: 48px; outline: 1px solid var(--hair); }
+.mat .ruler { display:flex; align-items:flex-end; gap: 4px; height: 48px; }
+.mat .ruler i { display:block; height: 8px; background: var(--ink); }
+.mat .ruler span { color: var(--soft); }
+.mat .nm { font-weight: bold; margin-top: 6px; word-break: break-word; }
+.mat .vals, .mat .from { color: var(--soft); }
+.mat.pulled .nm::before { content: "● "; }
+.tray { position: sticky; bottom: 0; background: var(--bg); border-top: 1px solid var(--rule); padding: 9px 0; margin-top: 24px; }
+.tray button { font: inherit; background: none; border: 0; padding: 0 0 0 13px; color: var(--ink); text-decoration: underline; cursor: pointer; }
+@media (max-width: 640px) { .site, .verdict { grid-template-columns: 1fr; gap: 6px; } .site img { width: 100%; } nav { gap: 13px; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="top"><b>Physiognomy</b><nav>
+    <a href="#inputs">inputs</a><a href="#library">library</a><a href="#values">by page</a><a href="#profile">profile</a><a href="#test">test</a>
+  </nav><span class="soft">after Daston</span></div>
+</header>
+<main>
+  <section data-tab="inputs">
+    <p class="lede">Everything the profile is drawn from: my pins, marked for the look, the idea, or both; and every page I marked yes or no, across three rounds, with my words where I gave them.</p>
+    <div class="block"><h2>Pins</h2>
+      <div class="filter" id="pinfilter"></div>
+      <div class="pins" id="pins"></div>
+    </div>
+    <div class="block"><h2>Sites</h2><div id="sites"></div></div>
+  </section>
+  <section data-tab="library">
+    <p class="lede">Every page broken into its materials: typefaces cut from the page itself, scales, colours, spacing, and layouts reduced to their text. Each keeps where it came from and how I felt about that source. A verdict belongs to the source, not the material. Pull materials to make something from them.</p>
+    <div class="filter" id="libfilter"></div>
+    <div id="library"></div>
+    <div class="tray" id="tray"></div>
+  </section>
+  <section data-tab="values">
+    <p class="lede">What each page measures, by my yes and no. Each paragraph is put together from the numbers by code: ranges and what recurs, never one average.</p>
+    <div id="values"></div>
+  </section>
+  <section data-tab="profile"><div class="profile" id="profile"></div></section>
+  <section data-tab="test"><div id="test" class="lede"></div></section>
+</main>
+<script>
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const chip = c => c ? `<span class="chip" style="background:${c}"></span>${c}` : "";
+function tab() {
+  const t = (location.hash || "#inputs").slice(1);
+  document.querySelectorAll("section[data-tab]").forEach(s => s.classList.toggle("on", s.dataset.tab === t));
+  document.querySelectorAll("nav a").forEach(a => a.setAttribute("aria-current", a.getAttribute("href") === "#" + t));
+}
+addEventListener("hashchange", tab);
+
+(async () => {
+  const d = await (await fetch("/view-data")).json();
+  tab();
+  // pins
+  const kinds = ["look", "both", "idea"];
+  let show = "look";
+  const filter = document.getElementById("pinfilter");
+  function drawPins() {
+    filter.innerHTML = kinds.map(k => `<button data-k="${k}" aria-pressed="${k === show}">${k === "look" ? "for the look" : k === "idea" ? "for the idea" : "both"} (${d.pins.filter(p => p.k === k).length})</button>`).join("");
+    filter.querySelectorAll("button").forEach(b => b.onclick = () => { show = b.dataset.k; drawPins(); });
+    document.getElementById("pins").innerHTML = d.pins.filter(p => p.k === show)
+      .map(p => `<div class="pin"><img loading="lazy" src="${esc(p.url.replace("/564x/", "/236x/"))}" alt=""><span>${esc(p.n)}</span></div>`).join("");
+  }
+  drawPins();
+  // sites
+  document.getElementById("sites").innerHTML = d.groups.map(g => `
+    <div class="verdict"><b>${esc(g.verdict)}</b><span class="soft">${esc(g.about)}</span></div>
+    ${g.sites.map(s => `<div class="site">
+      ${s.img ? `<img loading="lazy" src="/file/${esc(s.img)}" alt="">` : `<span></span>`}
+      <div><b>${esc(s.name)}</b> <a class="soft" href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, ""))}</a>
+      ${s.notes.map(n => `<p class="q">${esc(n)}</p>`).join("")}
+      ${(s.materials || []).length ? `<p class="q soft">${s.materials.map(esc).join(" · ")}</p>` : ""}</div></div>`).join("")}`).join("");
+  // values
+  document.getElementById("values").innerHTML = d.groups.map(g => `
+    <div class="block"><h2>${esc(g.verdict)} <span class="soft" style="font-weight:normal">${esc(g.about)}</span></h2>
+    <p class="para" style="margin-top:6px">${esc(g.paragraph)}</p>
+    <table><tr><th>site</th><th>typefaces</th><th>sizes</th><th>largest</th><th>ink</th><th>ground</th><th>spacing</th></tr>
+    ${g.sites.map(s => { const f = s.facts || {}; return `<tr><td>${esc(s.name)}</td><td>${esc((f.fonts || []).join(", "))}</td><td>${esc((f.sizes || []).join(" "))}</td>
+      <td>${f.largest_over_body ? esc(f.largest_over_body) + "×" : ""}</td><td>${(f.ink || []).slice(0, 2).map(chip).join(" ")}</td><td>${(f.ground || []).slice(0, 1).map(chip).join("")}</td><td>${esc((f.spacing || []).join(" "))}</td></tr>`; }).join("")}
+    </table></div>`).join("");
+  // library
+  const verdicts = ["all", "mine", "some", "kin", "inspiration", "not mine", "unjudged"];
+  let vf = "all";
+  const pulled = new Set(d.pulled || []);
+  const libKinds = [["typeface", "Typefaces", "cut from the page where each is used most", true], ["scale", "Scales", "the sizes a page uses, drawn to proportion"], ["colour", "Colours", "by role: ground, ink, accent; near colours merged"], ["spacing", "Spacing", "the steps a page repeats most"], ["layout", "Layouts", "the first screen reduced to its text", true]];
+  function matHTML(m) {
+    let pic = "";
+    if (m.kind === "colour") pic = `<div class="sw" style="background:${m.values.hex}"></div>`;
+    else if (m.kind === "spacing") pic = `<div class="ruler">${m.values.steps.map(v => `<i style="width:${Math.min(v, 120)}px" title="${v}"></i>`).join("")}</div>`;
+    else if (m.image) pic = `<img loading="lazy" src="/file/${esc(m.image)}" alt="">`;
+    const v = m.values;
+    const vals = m.kind === "typeface" ? `sizes ${v.sizes.join(" ")} · weights ${v.weights.join(" ")}${v.cases.length ? " · " + v.cases.join(" ") : ""}`
+      : m.kind === "scale" ? `${v.sizes.join(" ")} px · largest ${v.largest_over_body}× body`
+      : m.kind === "colour" ? v.roles.join(", ") + (v.near.length ? ` · with ${v.near.length} near` : "")
+      : m.kind === "spacing" ? "" : `${v.blocks} text blocks`;
+    const from = m.sources.slice(0, 4).map(s => `${esc(s.page)} (${esc(s.verdict)})`).join("; ") + (m.sources.length > 4 ? `; and ${m.sources.length - 4} more` : "");
+    const used = m.uses.length ? `<div class="vals">used in ${m.uses.map(u => esc(u.made)).join(", ")}</div>` : "";
+    return `<div class="mat${pulled.has(m.id) ? " pulled" : ""}" data-id="${esc(m.id)}"><div class="pic">${pic}</div><div class="nm">${esc(m.name)}</div><div class="vals">${esc(vals)}</div><div class="from">from ${from}</div>${used}</div>`;
+  }
+  function drawLib() {
+    const lf = document.getElementById("libfilter");
+    lf.innerHTML = verdicts.map(v => `<button data-v="${v}" aria-pressed="${v === vf}">${v === "all" ? "all sources" : v}</button>`).join("");
+    lf.querySelectorAll("button").forEach(b => b.onclick = () => { vf = b.dataset.v; drawLib(); });
+    const keep = m => vf === "all" || m.sources.some(s => s.verdict === vf);
+    document.getElementById("library").innerHTML = libKinds.map(([k, title, note, wide]) => {
+      const ms = d.library.filter(m => m.kind === k && keep(m));
+      return `<div class="kind"><h2>${title} <span class="soft" style="font-weight:normal">${ms.length} · ${note}</span></h2><div class="mats${wide ? " wide" : ""}">${ms.map(matHTML).join("")}</div></div>`;
+    }).join("");
+    document.querySelectorAll(".mat").forEach(el => el.onclick = () => { const id = el.dataset.id; pulled.has(id) ? pulled.delete(id) : pulled.add(id); el.classList.toggle("pulled"); drawTray(); savePulled(); });
+    drawTray();
+  }
+  function drawTray() {
+    const t = document.getElementById("tray");
+    t.innerHTML = pulled.size ? `<b>pulled ${pulled.size}</b> <span class="soft">${[...pulled].map(esc).join(", ")}</span><button id="clearpull">clear</button>` : `<span class="soft">Click a material to pull it. Pulled materials are kept in library/pulled.md, for the next thing to make.</span>`;
+    const c = document.getElementById("clearpull"); if (c) c.onclick = () => { pulled.clear(); drawLib(); savePulled(); };
+  }
+  let pt; function savePulled() { clearTimeout(pt); pt = setTimeout(() => fetch("/pulled", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify([...pulled]) }), 400); }
+  drawLib();
+  // profile
+  document.getElementById("profile").innerHTML = d.profile;
+  // test
+  document.getElementById("test").innerHTML = (d.tests || []).map(t => `<div class="block"><h2>${esc(t.name)}</h2>
+    ${t.chose ? `<p>Blind, I chose the page ${esc(t.chose)}.</p>${t.why ? `<p class="q">${esc(t.why)}</p>` : ""}<p>${t.files.map(f => `<a href="${esc(f.href)}" target="_blank">${esc(f.label)}</a>`).join(" · ")}</p>`
+      : `<p>Not judged yet: <a href="/test">judge it blind</a>.</p>`}</div>`).join("");
+})();
+</script>
+</body>
+</html>
