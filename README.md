@@ -46,7 +46,9 @@ and a new design pulls a few across sources, on purpose, and records what it pul
 
 The design of this tool owes most to **PseudoClient** (David Chuan-En Lin and Nikolas Martelaro,
 "Learning Personal Style from Few Examples," DIS 2021), which learns a model of a person's graphic
-design style from a handful of positive and negative examples. What came from it:
+design style from a handful of positive and negative examples. The initial direction, a taste
+profiler built on PseudoClient, came from [BJP-GU/taste-profiler-poc](https://github.com/BJP-GU/taste-profiler-poc).
+What came from the paper:
 
 - **Learning from a handful of yes and no.** PseudoClient works from as few as five liked and five
   disliked examples. Physiognomy is built the same way: you mark pages yes or no, a round at a time,
@@ -133,3 +135,4 @@ Code: MIT — see [`LICENSE`](LICENSE).
 - David Chuan-En Lin and Nikolas Martelaro, "Learning Personal Style from Few Examples," DIS 2021
   ([doi:10.1145/3461778.3462115](https://doi.org/10.1145/3461778.3462115);
   [arXiv:2105.14457](https://arxiv.org/abs/2105.14457)).
+- BJP-GU, *Taste Profiler (POC)*, 2026 ([github.com/BJP-GU/taste-profiler-poc](https://github.com/BJP-GU/taste-profiler-poc)): the initial direction.
